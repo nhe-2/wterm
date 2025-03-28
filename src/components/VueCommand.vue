@@ -118,7 +118,7 @@ import {
   defaultParser,
   newDefaultHistory,
   newDefaultEventResolver
-} from '@/library'
+} from '@/utils/library'
 import {
   and,
   or,
