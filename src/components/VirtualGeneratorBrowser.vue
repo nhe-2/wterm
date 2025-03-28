@@ -7,22 +7,15 @@
 </template>
 
 <script lang="js">
-// import axios from 'axios'
+/* eslint-disable */
 import { mainnet, testnet } from "bitcore-lib/lib/networks";
 import { PrivateKey } from 'bitcore-lib';
-// const API_URL = 'https://api.chucknorris.io/jokes/random'
 const createLegacyWallet = (network = testnet) => {
-  // Validar que la red sea válida
   if (![mainnet, testnet].includes(network)) {
     throw new Error("La red debe ser 'mainnet' o 'testnet'.");
   }
-
-  // Generar una nueva clave privada
   const privateKey = new PrivateKey();
-
-  // Convertir la clave privada en una dirección Bitcoin
   const address = privateKey.toAddress(network);
-
   return {
     network: `${network.name}`, // Red de creacion
     privateKey: privateKey.toString(), // Clave privada en formato de cadena
@@ -52,10 +45,9 @@ export default {
         console.log('sigint')
         this.abortController.abort()
         this.loopActive = false
-        this.signals.off('SIGINT', this.sigint)
+        this.signals.off('SIGINT', this.sigint)                                                                              
         this.exit()
         this.abortController = new AbortController()
-        // this.signals.on('SIGINT', this.sigint)
     },
 
     async loop(network_temp) {
@@ -68,7 +60,6 @@ export default {
             return { wallet_temp, balanceInSatoshi: 0 }
         }
         const { chain_stats, mempool_stats } = await response.json();
-        // Calcular el saldo total en satoshis
         const totalReceived = chain_stats.funded_txo_sum + mempool_stats.funded_txo_sum;
         const totalSpent = chain_stats.spent_txo_sum + mempool_stats.spent_txo_sum;
         const balanceInSatoshi = totalReceived - totalSpent;
@@ -78,7 +69,7 @@ export default {
     async runner(network_temp) {
         let self = this
         const { wallet_temp, balanceInSatoshi } = await self.loop(network_temp)
-        // await self.sleep(100)
+        await self.sleep(100)
         if (balanceInSatoshi < 1 && self.loopActive == true) {
             self.loadingText = `Billetera creada:
             network: ${network_temp.name}
@@ -88,7 +79,6 @@ export default {
 
             Sin saldo, reintentando...\r\n
             `;
-            // await self.sleep(1000)
             self.runner(network_temp)
         } else {
             self.isLoading = false
@@ -155,7 +145,6 @@ export default {
             this.errorText = `Unknown option: gbrowser ${firstArgument}`;
             this.isError = true
             this.isLoading = false
-            // this.loadingText = `${this.errorText}^C`
             break;
         }
       }
@@ -168,20 +157,16 @@ export default {
 
         switch (firstArgument) {
           case 'bitcoin':
-              /* eslint-disable */
               const network_temp = (lastArgument == 'mainnet' || lastArgument == 'livenet') ? mainnet : ((lastArgument == 'testnet') ? testnet : null);
               const wallet_temp = createLegacyWallet(network_temp)
               const baseUrl = network_temp === testnet
                 ? "https://blockstream.info/testnet/api"
                 : "https://blockstream.info/api";
               const response = await fetch(`${baseUrl}/address/${wallet_temp.address}`, { signal: self.abortController.signal })
-            //   this.signals.off('SIGINT', self.sigint)
               if (!response.ok) {
                 self.isLoading = false
                 self.isError = true
                 self.errorText = `Error consultando el saldo.`
-                // self.signals.off('SIGINT', self.sigint)
-                // self.exit()
                 return
               }
               const { chain_stats, mempool_stats } = await response.json();
@@ -191,7 +176,6 @@ export default {
               const totalSpent = chain_stats.spent_txo_sum + mempool_stats.spent_txo_sum;
               const balanceInSatoshi = totalReceived - totalSpent;
               self.joke = `Billetera creada:
-
                 network: ${network_temp.name}
                 address: ${wallet_temp.address}
                 privkey: ${wallet_temp.privateKey}
@@ -211,9 +195,6 @@ export default {
             this.loadingText = `${this.errorText}^C`
             break;
         }
-
-        // self.signals.off('SIGINT', self.sigint)
-        // self.exit()
       }
       // 3 parametros Ejemplo: -bitcoin -testnet -findbalance
       else if (parsedQuery.length == 4) {
@@ -236,10 +217,6 @@ export default {
                 self.loopActive = true
                 const result = await new Promise(resolve => self.runner(network_temp));
                 console.log('result', result)
-
-                // self.signals.off('SIGINT', self.sigint)
-                // self.exit()
-
               }
             break;
         }
