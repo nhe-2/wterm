@@ -9,7 +9,7 @@ const targetAddresses = [
 ].map(addr => addr.toLowerCase());
 
 // Listado de RPCs
-const rpcs = {
+export const rpcs = {
     ethereum: 'https://ethereum-mainnet.wallet.brave.com', // ETH
     bscmainnet: 'https://bsc-mainnet.wallet.brave.com', // BSC
 };
@@ -23,9 +23,9 @@ const rpcs = {
  */
 export const createLegacyWalletETH = (network) => {
   // Validar que la red sea válida
-//   if (![mainnet, testnet].includes(network)) {
-//     throw new Error("La red debe ser 'mainnet' o 'testnet'.");
-//   }
+  if (!Object.keys(rpcs).includes(network)) {
+    throw new Error("Red invalida, use 'gbrowser evm help' para conocer el listado.");
+  }
 
   const wallet = ethers.Wallet.createRandom();
   const mnemonic = wallet.mnemonic.phrase;
@@ -41,7 +41,7 @@ export const createLegacyWalletETH = (network) => {
 
   return {
     mnemonic: wallet.mnemonic.phrase,
-    privateKey: walletR.address.privateKey, // Clave privada en formato de cadena
+    privateKey: walletR.privateKey, // Clave privada en formato de cadena
     address: address,       // Dirección Bitcoin en formato de cadena
     balance: 0                         // Saldo inicial (se actualizará más tarde)
   };

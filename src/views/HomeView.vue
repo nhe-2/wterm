@@ -35,11 +35,7 @@ import {
 } from '@/utils/library'
 import NanoEditor from '@/components/NanoEditor.vue'
 import ChuckNorris from '@/components/ChuckNorris.vue'
-import GeneratorBrowser from '@/components/GeneratorBrowser.vue'
 import VirtualGeneratorBrowser from '@/components/VirtualGeneratorBrowser.vue'
-
-// import { PrivateKey } from 'bitcore-lib';
-// import { mainnet, testnet } from "bitcore-lib/lib/networks";
 
 const getUA = () => {
     let device = "Unknown";
@@ -62,8 +58,7 @@ const getUA = () => {
     return device;
 }
 
-// const PROMPT = 'user@nhe2-terminal~$'
-const PROMPT = `nhe2@${getUA()}~$`
+const PROMPT = `nhe2@DEVICE-AAA0AA0 ${getUA()} $`
 
 // const createLegacyWallet = (network = testnet) => {
 //   // Validar que la red sea válida
@@ -123,7 +118,7 @@ export default {
     const cursorPosition = ref(0)
     const dispatchedQueries = ref(new Set())
     const font = ref('')
-    const helpText = ref('Type in help')
+    const helpText = ref(`Escribe ´help´ si no sabes que hacer`)
     const helpTimeout = ref(3500)
     const hideBar = ref(true)
     const hideButtons = ref(true)
@@ -136,10 +131,10 @@ export default {
     const prompt = ref(PROMPT)
     const query = ref('')
     const showHelp = ref(true)
-    const title = ref('nhe2-terminal - 720x350')
+    const title = ref('Nhe2 Wizard Terminal - 720x350')
 
     const optionsResolver = (program, parsedQuery, setQuery) => {
-      const lastArgument = parsedQuery[parsedQuery.length - 1]
+      let lastArgument = parsedQuery[parsedQuery.length - 1]
 
       switch (program) {
         case 'cd':
@@ -170,22 +165,55 @@ export default {
             else if ('bitcoin'.startsWith(parsedQuery.at(-1))) {
               setQuery('gbrowser bitcoin');
             } 
-            else if ('ethereum'.startsWith(parsedQuery.at(-1))) {
-              setQuery('gbrowser ethereum');
+            else if ('evm'.startsWith(parsedQuery.at(-1))) {
+              setQuery('gbrowser evm');
             }
           } 
           else if (parsedQuery.length === 3) {
-            if ('mainnet'.startsWith(parsedQuery.at(-1))) {
-              setQuery('gbrowser bitcoin mainnet');
+            let firstArgument = parsedQuery.at(-2)
+            lastArgument = parsedQuery[parsedQuery.length - 1]
+            console.log('firstArgument', firstArgument)
+            console.log('lastArgument', lastArgument)
+
+            if ('help'.startsWith(lastArgument) && firstArgument == 'bitcoin') {
+              setQuery('gbrowser bitcoin help');
             } 
-            else {
+            if ('help'.startsWith(lastArgument) && firstArgument == 'evm') {
+              setQuery('gbrowser evm help');
+            } 
+            else if ('mainnet'.startsWith(lastArgument) && firstArgument == 'bitcoin') {
+              setQuery('gbrowser bitcoin mainnet');
+            }
+            else if ('testnet'.startsWith(lastArgument) && firstArgument == 'bitcoin') {
               setQuery('gbrowser bitcoin testnet');
+            }
+            else if ('ethereum'.startsWith(lastArgument) && firstArgument == 'evm') {
+              setQuery('gbrowser evm ethereum');
+            }
+            else if ('bscmainnet'.startsWith(lastArgument) && firstArgument == 'evm') {
+              setQuery('gbrowser evm bscmainnet');
             }
           }
           else if (parsedQuery.length === 4) {
-            if ('findbalance'.startsWith(parsedQuery.at(-1))) {
-              setQuery('gbrowser bitcoin testnet findbalance');
-            }
+            let firstArgument = parsedQuery.at(-3)
+            let secondArgument = parsedQuery.at(-2)
+            lastArgument = parsedQuery[parsedQuery.length - 1]
+            console.log('firstArgument', firstArgument)
+            console.log('secondArgument', secondArgument)
+            console.log('lastArgument', lastArgument)
+            
+            if ('help'.startsWith(lastArgument) && firstArgument == 'bitcoin') {
+              setQuery(`gbrowser bitcoin ${secondArgument} help`);
+            } 
+            else if ('help'.startsWith(lastArgument) && firstArgument == 'evm') {
+              setQuery(`gbrowser evm ${secondArgument} help`);
+            } 
+            else if ('findbalance'.startsWith(lastArgument) && firstArgument == 'bitcoin') {
+              setQuery(`gbrowser bitcoin ${secondArgument} findbalance`);
+            } 
+            else if ('findbalance'.startsWith(lastArgument) && firstArgument == 'evm') {
+              setQuery(`gbrowser evm ${secondArgument} findbalance`);
+            } 
           }
           break;
         
@@ -196,28 +224,8 @@ export default {
       reboot: () => {
         location.reload()
       },
-      vgbrowser: () => GeneratorBrowser,
+      // vgbrowser: () => GeneratorBrowser,
       gbrowser: () => VirtualGeneratorBrowser,
-
-      // cd: parsedQuery => {
-      //   if (parsedQuery.length < 2 || parsedQuery[parsedQuery.length - 1] === '.') {
-      //     return createQuery()
-      //   }
-
-      //   const lastArgument = parsedQuery[parsedQuery.length - 1]
-
-      //   if (lastArgument === 'home') {
-      //     prompt.value = `${PROMPT}/home`
-      //   }
-      //   if ((lastArgument === '../' || lastArgument === '..') && prompt.value === `${PROMPT}/home`) {
-      //     prompt.value = `${PROMPT}`
-      //   }
-      //   if (lastArgument !== 'home' && lastArgument !== '../' && lastArgument !== '..') {
-      //     return createStderr(`bash: cd: ${lastArgument}: No such file or directory`)
-      //   }
-
-      //   return createQuery()
-      // },
 
       clear: () => {
         // "splice" is necessary since Vue.js losses its reactivity if array is
@@ -230,14 +238,12 @@ export default {
       //   return createStdout('Hello world')
       // },
 
-//       'copyright': () => {
-//         return createStdout(`Windows PowerShell
-// Copyright (C) Microsoft Corporation. Todos los derechos reservados.
+      'copyright': () => {
+        return createStdout(`Wizard Terminal
+Copyright (C) Anonymous Corporation. Todos los derechos reservados.
 
-// Instale la versión más reciente de PowerShell para obtener nuevas características y mejoras. https://aka.ms/PSWindows
-
-// `)
-//       },
+`)
+      },
 
       history: () => {
         const history = []

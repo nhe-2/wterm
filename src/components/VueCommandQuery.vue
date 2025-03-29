@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Query -->
+    <!-- Query / Consulta -->
     <div
       v-show="shouldShowQuery"
       class="vue-command__query">
@@ -8,7 +8,7 @@
       <VueCommandPrompt />
 
       <!-- Query -->
-      <!-- TODO: Implement line breaks -->
+      <!-- TODO: Implementar saltos de línea -->
       <input
         ref="queryRef"
         v-model="local.query"
@@ -28,7 +28,7 @@
         @keyup.enter.exact="submit">
     </div>
 
-    <!-- Multiline queries -->
+    <!-- Consultas multilínea -->
     <div
       v-for="(multilineQuery, index) in multilineQueries"
       v-show="isBeforeReverseISearch(index)"
