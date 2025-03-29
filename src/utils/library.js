@@ -20,7 +20,7 @@ const C_KEY = 'c'
 // TODO Implement keyboard combinations, e. g. Ctrl + u
 
 // Creates a command not found component
-export const createCommandNotFound = (command, notFoundText = 'command not found', name = 'VueCommandNotFound') => {
+export const createCommandNotFound = (command, notFoundText = 'comando no encontrado', name = 'VueCommandNotFound') => {
   const text = `${command}: ${notFoundText}`
   return createStdout(text, name)
 }
