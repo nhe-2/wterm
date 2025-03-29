@@ -11,21 +11,8 @@
 import { mainnet, testnet } from "bitcore-lib/lib/networks";
 import { PrivateKey } from 'bitcore-lib';
 import { ethers } from 'ethers';
-import { createLegacyWalletETH, getBalanceETH, rpcs } from "@/utils/helper-eth";
-
-const createLegacyWalletBTC = (network = testnet) => {
-  if (![mainnet, testnet].includes(network)) {
-    throw new Error("La red debe ser 'mainnet' o 'testnet'.");
-  }
-  const privateKey = new PrivateKey();
-  const address = privateKey.toAddress(network);
-  return {
-    network: `${network.name}`, // Red de creacion
-    privateKey: privateKey.toString(), // Clave privada en formato de cadena
-    address: address.toString(),       // Dirección Bitcoin en formato de cadena
-    balance: 0                         // Saldo inicial (se actualizará más tarde)
-  };
-}
+import { createLegacyWalletBTC, createLegacyWalletEVM, getBalanceEVM, rpcsEVM } from "@/utils/helper-nhe2";
+import {  } from "@/utils/helper-eth";
 
 export default {
   inject: ['exit', 'signals', 'context'],
@@ -34,8 +21,8 @@ export default {
     isError: false,
     isLoading: true,
     joke: '',
-    errorText: 'Loading ...',
-    loadingText: 'Loading ...',
+    errorText: 'Cargando ...',
+    loadingText: 'Cargando ...',
     abortController: null,
     loopActive: false,
   }),
@@ -45,15 +32,9 @@ export default {
       return new Promise(resolve => setTimeout(resolve, ms));
     },
     sigint() {
-        console.log('sigint')
-        console.log('abort')
         this.abortController.abort()
-        console.log('abort')
         this.signals.off('SIGINT', this.sigint)
-        console.log('SIGINT:off')
         this.exit()
-        console.log('exit')
-        console.log('new AbortController')
         this.loopActive = false
         this.abortController = new AbortController()
     },
@@ -108,8 +89,8 @@ export default {
       let self = this
       
       try {
-        const wallet_temp = createLegacyWalletETH(network_temp);
-        const provider = new ethers.JsonRpcProvider(rpcs[network_temp]);
+        const wallet_temp = createLegacyWalletEVM(network_temp);
+        const provider = new ethers.JsonRpcProvider(rpcsEVM[network_temp]);
         const balanceInWei = await provider.getBalance(wallet_temp.address);
         return { wallet_temp, balanceInWei };
       } catch (error) {
@@ -151,22 +132,15 @@ export default {
 
   async mounted () {
     const self = this
-    console.clear()
     self.abortController = new AbortController()
     self.signals.on('SIGINT', self.sigint)
 
     try {
       const parsedQuery = this.context.parsedQuery ?? []
-
       let firstArgument = parsedQuery[parsedQuery.length - 1]
-      console.log('firstArgument', firstArgument)
       let lastArgument = parsedQuery[parsedQuery.length - 1]
-      console.log('lastArgument', lastArgument)
       let cycleArgument = parsedQuery[parsedQuery.length - 1]
-      console.log('cycleArgument', cycleArgument)
       let limitArgument = parsedQuery[parsedQuery.length - 1]
-      console.log('limitArgument', limitArgument)
-
       if (parsedQuery.length < 2) {
         this.errorText = `Argumentos faltantes. Uso: gbrowser <opción>`
         this.isError = true
@@ -177,10 +151,7 @@ export default {
       }
       // 1 parametro Ejemplo: gbrowser help
       else if (parsedQuery.length == 2) {
-        console.log("1 parametros")
         firstArgument = parsedQuery[parsedQuery.length - 1]
-        console.log('firstArgument', firstArgument)
-
         switch (firstArgument) {
           case 'bitcoin':
             this.errorText = `Argumentos faltantes. Uso: gbrowser bitcoin <network>`
@@ -217,11 +188,8 @@ export default {
       }
       // 2 parametro Ejemplo: -bitcoin -testnet
       else if (parsedQuery.length == 3) {
-        console.log("2 parametros")
         firstArgument = parsedQuery[parsedQuery.length - 2]
-        console.log('firstArgument', firstArgument)
         lastArgument = parsedQuery[parsedQuery.length - 1]
-        console.log('lastArgument', lastArgument)
 
         switch (firstArgument) {
           case 'bitcoin':
@@ -278,17 +246,10 @@ export default {
               return;
             }
               firstArgument = parsedQuery[parsedQuery.length - 2]
-              console.log('firstArgument', firstArgument)
               lastArgument = parsedQuery[parsedQuery.length - 1]
-              console.log('lastArgument', lastArgument)
-              
               const network = lastArgument
-              const wallet_temp2 = createLegacyWalletETH(network);
-              console.log('wallet', wallet_temp2)
-
-              const {balance,txCount} = await getBalanceETH(wallet_temp2.address, network);
-              console.log('balance', balance, txCount)
-              
+              const wallet_temp2 = createLegacyWalletEVM(network);
+              const {balance,txCount} = await getBalanceEVM(wallet_temp2.address, network);
               self.joke = `Billetera creada:
                 network: ${network}
                 address: ${wallet_temp2.address}
@@ -313,27 +274,17 @@ export default {
       }
       // 3 parametros Ejemplo: -bitcoin -testnet -findbalance
       else if (parsedQuery.length == 4) {
-        console.log("3 parametros")
         firstArgument = parsedQuery[parsedQuery.length - 3]
-        console.log('firstArgument', firstArgument)
         lastArgument = parsedQuery[parsedQuery.length - 2]
-        console.log('lastArgument', lastArgument)
-
         cycleArgument = parsedQuery[parsedQuery.length - 1]
-        console.log('cycleArgument', cycleArgument)
-
         switch (firstArgument) {
           case 'bitcoin':
               if (cycleArgument == "findbalance") {
-                console.log('findbalance')
                 const network_temp = (lastArgument == 'mainnet' || lastArgument == 'livenet') ? mainnet : ((lastArgument == 'testnet') ? testnet : null);
                 const baseUrl = network_temp === testnet ? "https://blockstream.info/testnet/api" : "https://blockstream.info/api";
-                console.log('baseUrl', baseUrl)
-
                 try {
                   self.loopActive = true
                   const result = await new Promise(resolve => self.runner(network_temp));
-                  console.log('result', result)
                 } catch (error) {
                   console.log("error loop: ", error)                  
                   console.error(error)                  
@@ -355,8 +306,6 @@ export default {
             break;
           case 'evm':
               if (cycleArgument == "findbalance") {
-                console.log('findbalance', lastArgument)
-
                 try {
                   self.loopActive = true
                   const result = await new Promise(resolve => self.runnerEVM(lastArgument));

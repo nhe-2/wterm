@@ -60,48 +60,6 @@ const getUA = () => {
 
 const PROMPT = `nhe2@DEVICE-AAA0AA0 ${getUA()} $`
 
-// const createLegacyWallet = (network = testnet) => {
-//   // Validar que la red sea válida
-//   if (![mainnet, testnet].includes(network)) {
-//     throw new Error("La red debe ser 'mainnet' o 'testnet'.");
-//   }
-
-//   // Generar una nueva clave privada
-//   const privateKey = new PrivateKey();
-  
-//   // Convertir la clave privada en una dirección Bitcoin
-//   const address = privateKey.toAddress(network);
-
-//   return {
-//     network: `${network.name}`, // Red de creacion
-//     privateKey: privateKey.toString(), // Clave privada en formato de cadena
-//     address: address.toString(),       // Dirección Bitcoin en formato de cadena
-//     balance: 0                         // Saldo inicial (se actualizará más tarde)
-//   };
-// }
-
-// const getBalance = async (address, network = testnet) => {
-//   console.log('getBalance', network)
-//   const baseUrl = network === testnet
-//     ? "https://blockstream.info/testnet/api"
-//     : "https://blockstream.info/api";
-
-//   try {
-//     // Consultar la API para obtener los detalles de la dirección
-//     const response = await axios.get(`${baseUrl}/address/${address}`);
-//     const { chain_stats, mempool_stats } = response.data;
-
-//     // Calcular el saldo total en satoshis
-//     const totalReceived = chain_stats.funded_txo_sum + mempool_stats.funded_txo_sum;
-//     const totalSpent = chain_stats.spent_txo_sum + mempool_stats.spent_txo_sum;
-//     const balance = totalReceived - totalSpent;
-
-//     return balance; // Saldo en satoshis
-//   } catch (error) {
-//     throw new Error(`Error al obtener el saldo: ${error.message}`);
-//   }
-// }
-
 export default {
   components: {
     VueCommand

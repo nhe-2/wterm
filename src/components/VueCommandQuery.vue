@@ -428,13 +428,13 @@ const unwatchReverseISearch = watch(reverseISearch, () => {
       }
 
       // Reset status if dispatched query has been found
-      reverseISearchStatus.value = 'reverse-i-search'
+      reverseISearchStatus.value = 'busqueda-inversa'
 
       return
     }
   }
 
-  reverseISearchStatus.value = 'failed reverse-i-search'
+  reverseISearchStatus.value = 'falló busqueda-inversa'
 })
 const unwatchTerminalCursorPosition = watch(
   () => terminal.value.cursorPosition,
